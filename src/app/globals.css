@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Screens with room for the curtain-reveal footer (it is pinned to the viewport, so it must fit). */
+@custom-variant curtain (@media (min-width: 1024px) and (min-height: 860px));
+
+/*
+  Tokens mirror portfolio.ahmxd.net: zinc-950 base, violet as the single brand
+  accent, teal reserved for one semantic meaning ("live in production").
+*/
+:root {
+  --bg: #fafafa;
+  --bg-raised: #f4f4f5;
+  --surface: #ffffff;
+  --surface-strong: #f4f4f5;
+  --line: rgb(9 9 11 / 0.09);
+  --line-strong: rgb(9 9 11 / 0.16);
+  --text: #09090b;
+  --text-muted: #52525b;
+  --text-soft: #71717a;
+  --accent: #6d28d9;
+  --accent-fill: #7c3aed;
+  --accent-soft: rgb(124 58 237 / 0.1);
+  --accent-contrast: #fafafa;
+  --live: #0f766e;
+  --star: #3f3f46;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 24px 60px -30px rgb(24 24 27 / 0.25);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #09090b;
+  --bg-raised: #0e0e11;
+  --surface: #111114;
+  --surface-strong: #18181b;
+  --line: rgb(250 250 250 / 0.08);
+  --line-strong: rgb(250 250 250 / 0.14);
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-soft: #8b8b94;
+  --accent: #a78bfa;
+  --accent-fill: #7c3aed;
+  --accent-soft: rgb(139 92 246 / 0.14);
+  --accent-contrast: #fafafa;
+  --live: #2dd4bf;
+  --star: #e4e4e7;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 30px 80px -40px rgb(0 0 0 / 0.8);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-soft: var(--text-soft);
+  --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-live: var(--live);
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-jetbrains);
+  --shadow-panel: var(--shadow);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* z-index scale: nav 40, mobile menu 50, skip link 60 */
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  scroll-behavior: smooth;
+  /* Reserve the scrollbar's width so locking scroll during the loader never shifts the layout. */
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-fill);
+  color: var(--accent-contrast);
+}
+
+/* In the base layer so utilities (e.g. the command palette's search box) can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+.display {
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.label {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Hairline top rule used to separate sections without boxing them. */
+.rule {
+  background: linear-gradient(90deg, transparent, var(--line-strong) 20%, var(--line-strong) 80%, transparent);
+  height: 1px;
+}
+
+/*
+  Tinted band for alternating sections. The tint fades in and out over the first and
+  last stretch of the section, so neighbouring sections blend instead of meeting at a seam.
+*/
+.band {
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg-raised) 22%,
+    var(--bg-raised) 78%,
+    var(--bg) 100%
+  );
+}
+
+/* Loading screen ---------------------------------------------------------------------------- */
+@keyframes loader-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes loader-line {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Failsafe: if the script never runs, the loader gets out of the way on its own. */
+@keyframes loader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+#site-loader {
+  animation: loader-failsafe 0.4s ease 10s forwards;
+}
+
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Theme switches cross-fade instead of snapping (browsers with View Transitions). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
