@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { MotionProvider } from "@/components/motion-provider";
-import { SiteLoader } from "@/components/site-loader";
-import { site } from "@/lib/site";
+import { LoaderGate } from "@/components/loader-gate";
+import { cad, plans, site } from "@/lib/site";
 import "./globals.css";
 
 const geist = Geist({
@@ -78,6 +78,7 @@ const jsonLd = {
   url: site.url,
   email: site.email,
   description: site.description,
+  priceRange: `${cad(plans[0].upfront)} and up, or from ${cad(plans[0].monthly)} a month`,
   founder: { "@type": "Person", name: site.founder, url: site.links.portfolio },
   address: {
     "@type": "PostalAddress",
@@ -118,7 +119,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <SiteLoader />
+        <LoaderGate />
         <MotionProvider>{children}</MotionProvider>
       </body>
     </html>

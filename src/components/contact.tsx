@@ -10,8 +10,10 @@ import {
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useReducedMotion } from "@/components/use-reduced-motion";
-import { useState, type FormEvent } from "react";
-import { needs, site, timelines } from "@/lib/site";
+import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
+import { needs, payments, site, timelines } from "@/lib/site";
+import { onPlanAnnounced } from "./plan-intent";
 import { DecryptedText } from "./reactbits/decrypted-text";
 import { Reveal } from "./reveal";
 import { SectionTitle } from "./section-title";
@@ -68,9 +70,22 @@ export function Contact() {
   const { copied, copy } = useCopy();
   const [selected, setSelected] = useState<string[]>([]);
   const [timeline, setTimeline] = useState<string>("");
+  const [payment, setPayment] = useState<string>("");
   const [form, setForm] = useState({ name: "", business: "", email: "", details: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [brief, setBrief] = useState<string | null>(null);
+
+  // A pricing button carries its plan here, so the matching answers arrive already picked.
+  useEffect(
+    () =>
+      onPlanAnnounced(({ need, payment }) => {
+        setSelected((cur) => (cur.includes(need) ? cur : [...cur.filter((n) => n !== "Not sure yet"), need]));
+        setPayment(payment);
+        setErrors((er) => ({ ...er, needs: undefined }));
+        setBrief(null);
+      }),
+    [],
+  );
 
   const toggleNeed = (n: string) =>
     setSelected((cur) => (cur.includes(n) ? cur.filter((x) => x !== n) : [...cur, n]));
@@ -103,6 +118,7 @@ export function Contact() {
       form.business.trim() && `Business: ${form.business.trim()}`,
       `Reply to: ${form.email.trim()}`,
       `Needs: ${selected.join(", ")}`,
+      payment && `Payment: ${payment}`,
       timeline && `Timeline: ${timeline}`,
     ].filter(Boolean);
     const text = `${header.join("\n")}\n\n${form.details.trim()}`;
@@ -216,6 +232,24 @@ export function Contact() {
 
                 <fieldset>
                   <legend className="mb-3 font-semibold">
+                    How would you like to pay? <span className="font-normal text-soft">(optional)</span>
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {payments.map((p) => (
+                      <Chip
+                        key={p}
+                        type="radio"
+                        name="payment"
+                        value={p}
+                        checked={payment === p}
+                        onChange={() => setPayment(p)}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend className="mb-3 font-semibold">
                     Timeline <span className="font-normal text-soft">(optional)</span>
                   </legend>
                   <div className="flex flex-wrap gap-2">
@@ -300,7 +334,12 @@ export function Contact() {
                       className="transition-transform duration-300 group-hover:translate-x-0.5"
                     />
                   </button>
-                  <p className="text-sm text-soft">Nothing on this form is stored or sent by the website.</p>
+                  <p className="text-sm text-soft">
+                    Nothing on this form is stored or sent by the website.{" "}
+                    <Link href="/privacy" className="underline underline-offset-4 transition-colors hover:text-ink">
+                      Privacy Policy
+                    </Link>
+                  </p>
                 </div>
               </motion.form>
             )}

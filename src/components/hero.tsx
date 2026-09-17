@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { projects } from "@/lib/site";
+import { heroLine, projects } from "@/lib/site";
 import { ContainerScroll } from "./ui/container-scroll-animation";
 import { ButtonLink } from "./button-link";
 import { Magnetic } from "./magnetic";
@@ -40,9 +40,9 @@ function HeroCopy() {
 
       {/* Each line draws its outline, then fills: the signature reveal used across the site. */}
       <h1 className="mt-8 flex flex-col items-center text-[clamp(2.4rem,6.2vw,5.75rem)] leading-none">
-        <StrokeText text="Trusted Calgary" trigger="mount" start={loaded} delay={0.25} drawDuration={1.1} stagger={0.03} replayOnHover />{" "}
+        <StrokeText text="Websites and IT for" trigger="mount" start={loaded} delay={0.25} drawDuration={1.1} stagger={0.03} replayOnHover />{" "}
         <StrokeText
-          text="Web & IT Solutions"
+          text="Calgary businesses."
           trigger="mount"
           start={loaded}
           delay={0.6}
@@ -55,8 +55,8 @@ function HeroCopy() {
         />
       </h1>
 
-      <motion.p {...rise(1.1)} className="mt-6 max-w-[30rem] text-lg leading-relaxed text-muted md:text-xl">
-        Websites that bring in customers. IT that stays out of your way.
+      <motion.p {...rise(1.1)} className="mt-6 max-w-[34rem] text-lg leading-relaxed text-muted md:text-xl">
+        {heroLine}
       </motion.p>
 
       <motion.div {...rise(1.25)} className="mt-9 flex flex-wrap items-center justify-center gap-3">

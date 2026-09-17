@@ -36,7 +36,7 @@ export function Services() {
           <div className="p-7 md:p-9">
             <CardHead
               title="Business websites"
-              body="Fast, mobile-first sites that turn visitors into calls. You own every line."
+              body="Fast, mobile-first sites that turn visitors into calls."
             />
           </div>
           <div className="relative min-h-[280px] flex-1 overflow-hidden sm:min-h-[340px]" aria-hidden>

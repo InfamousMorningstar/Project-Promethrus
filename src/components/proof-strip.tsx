@@ -47,8 +47,9 @@ export function ProofStrip() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.7, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
-            <dt className="order-2 max-w-[18ch] text-sm leading-snug text-muted">{item.label}</dt>
+            <dt className="order-2 max-w-[22ch] text-sm leading-snug text-muted">{item.label}</dt>
             <dd className="order-1 text-5xl font-extrabold tracking-[-0.05em] md:text-6xl">
+              {item.prefix}
               <Ticker value={item.value} />
             </dd>
           </motion.div>

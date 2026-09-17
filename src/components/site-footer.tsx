@@ -4,7 +4,8 @@ import { ArrowRightIcon, ArrowUpIcon } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import { useEffect, useRef, useState } from "react";
-import { navItems, site } from "@/lib/site";
+import Link from "next/link";
+import { legalLinks, navItems, site } from "@/lib/site";
 import { ButtonLink } from "./button-link";
 import { CalgaryNow } from "./footer/calgary-now";
 import { StatusBoard } from "./footer/status-board";
@@ -104,7 +105,8 @@ export function SiteFooter() {
             </div>
           </div>
 
-          <div className="mt-14 grid gap-8 border-t border-line pt-8 sm:grid-cols-2 lg:grid-cols-12 lg:items-start curtain:mt-12">
+          {/* Stacked above the wordmark, whose hover area reaches up under these links. */}
+          <div className="relative z-10 mt-14 grid gap-8 border-t border-line pt-8 sm:grid-cols-2 lg:grid-cols-12 lg:items-start curtain:mt-12">
             <div className="lg:col-span-4">
               <Wordmark />
               <CalgaryNow />
@@ -125,6 +127,15 @@ export function SiteFooter() {
                     <a href={l.href} target="_blank" rel="noreferrer" className="text-soft transition-colors hover:text-ink">
                       {l.label}
                     </a>
+                  </li>
+                ))}
+              </ul>
+              <ul aria-label="Legal" className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                {legalLinks.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-soft underline-offset-4 transition-colors hover:text-ink hover:underline">
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

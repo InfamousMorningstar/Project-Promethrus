@@ -19,6 +19,7 @@ import {
   PathIcon,
   QuestionIcon,
   StackIcon,
+  TagIcon,
   UserIcon,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
@@ -206,9 +207,10 @@ export function CommandIsland() {
       { id: "services", label: "Services", hint: "What I build", group: "Go to", icon: <StackIcon {...ICON} />, shortcut: "1", keywords: "websites apps it hosting automation", action: { kind: "section", target: "services" } },
       { id: "work", label: "Work", hint: "Live client sites", group: "Go to", icon: <BriefcaseIcon {...ICON} />, shortcut: "2", keywords: "projects portfolio clients", action: { kind: "section", target: "work" } },
       { id: "process", label: "Process", hint: "How a project runs", group: "Go to", icon: <PathIcon {...ICON} />, shortcut: "3", keywords: "steps timeline", action: { kind: "section", target: "process" } },
-      { id: "studio", label: "Studio", hint: "Meet the engineer", group: "Go to", icon: <UserIcon {...ICON} />, shortcut: "4", keywords: "about salman", action: { kind: "section", target: "studio" } },
-      { id: "faq", label: "FAQ", hint: "Common questions", group: "Go to", icon: <QuestionIcon {...ICON} />, shortcut: "5", keywords: "pricing ownership", action: { kind: "section", target: "faq" } },
-      { id: "contact", label: "Start a project", hint: "Send a brief", group: "Go to", icon: <PaperPlaneTiltIcon {...ICON} />, shortcut: "6", keywords: "contact hire quote", action: { kind: "section", target: "contact" } },
+      { id: "pricing", label: "Pricing", hint: "Upfront or monthly", group: "Go to", icon: <TagIcon {...ICON} />, shortcut: "4", keywords: "cost price plans monthly payment", action: { kind: "section", target: "pricing" } },
+      { id: "studio", label: "Studio", hint: "Meet the engineer", group: "Go to", icon: <UserIcon {...ICON} />, shortcut: "5", keywords: "about salman backup handover", action: { kind: "section", target: "studio" } },
+      { id: "faq", label: "FAQ", hint: "Common questions", group: "Go to", icon: <QuestionIcon {...ICON} />, shortcut: "6", keywords: "ownership payment unavailable", action: { kind: "section", target: "faq" } },
+      { id: "contact", label: "Start a project", hint: "Send a brief", group: "Go to", icon: <PaperPlaneTiltIcon {...ICON} />, shortcut: "7", keywords: "contact hire quote", action: { kind: "section", target: "contact" } },
       { id: "theme", label: `Switch to ${theme === "dark" ? "light" : "dark"} theme`, hint: "Appearance", group: "Do", icon: <CircleHalfIcon {...ICON} />, keywords: "dark light mode", action: { kind: "theme" } },
       { id: "email", label: "Email Salman", hint: site.email, group: "Do", icon: <EnvelopeSimpleIcon {...ICON} />, keywords: "mail message", action: { kind: "email" } },
       { id: "portfolio", label: "Open the portfolio", hint: "portfolio.ahmxd.net", group: "Do", icon: <ArrowUpRightIcon {...ICON} />, external: true, keywords: "case studies engineering", action: { kind: "portfolio" } },
@@ -292,7 +294,7 @@ export function CommandIsland() {
     } else if (e.key === "Escape") {
       e.preventDefault();
       close();
-    } else if (!query && /^[1-6]$/.test(e.key)) {
+    } else if (!query && /^[1-7]$/.test(e.key)) {
       e.preventDefault();
       run(commands.find((c) => c.shortcut === e.key));
     }
