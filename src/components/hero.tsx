@@ -1,65 +1,59 @@
 "use client";
 
-import { ArrowRightIcon, ArrowUpRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
-import { useReducedMotion } from "@/components/use-reduced-motion";
-import Image from "next/image";
-import { useState } from "react";
+import type { ReactNode } from "react";
 import { heroLine, projects } from "@/lib/site";
-import { ContainerScroll } from "./ui/container-scroll-animation";
 import { ButtonLink } from "./button-link";
+import { HeroWindows } from "./hero-windows";
+import { useCalgaryTemp, useCalgaryTime, useSiteStatus } from "./live-data";
+import { useLoaderDone } from "./loader-state";
 import { Magnetic } from "./magnetic";
-import { DecryptedText } from "./reactbits/decrypted-text";
 import GhostFibers from "./reactbits/ghost-fibers";
 import { StrokeText } from "./reactbits/stroke-text";
-import { useLoaderDone } from "./loader-state";
 import { useTheme } from "./use-theme";
 
 const ease = [0.16, 1, 0.3, 1] as const;
-const ROTATE_MS = 6500;
+const clientCount = projects.filter((p) => p.relation === "Client work").length;
 
-function HeroCopy() {
+function HeroCopy({ className = "" }: { className?: string }) {
   // Everything waits for the loading screen to open, so the intro plays in view.
   const loaded = useLoaderDone();
-  // Same props on server and client; MotionProvider drops the movement for reduced-motion users.
   const rise = (delay: number) => ({
     initial: { opacity: 0, y: 16, filter: "blur(6px)" },
     animate: loaded ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined,
     transition: { duration: 1, delay, ease },
   });
+  const line = { trigger: "mount" as const, start: loaded, drawDuration: 1.1, stagger: 0.03, replayOnHover: true };
 
   return (
-    <div className="flex flex-col items-center px-2">
-      <motion.p
-        {...rise(0.05)}
-        className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/60 px-3.5 py-1.5 font-mono text-[11px] tracking-[0.08em] text-muted uppercase backdrop-blur"
-      >
-        <span className="size-1.5 rounded-full bg-live" aria-hidden />
-        <DecryptedText text="Web design, apps & IT systems" animateOn="view" start={loaded} />
-      </motion.p>
-
-      {/* Each line draws its outline, then fills: the signature reveal used across the site. */}
-      <h1 className="mt-8 flex flex-col items-center text-[clamp(2.4rem,6.2vw,5.75rem)] leading-none">
-        <StrokeText text="Websites and IT for" trigger="mount" start={loaded} delay={0.25} drawDuration={1.1} stagger={0.03} replayOnHover />{" "}
+    <div className={className}>
+      {/* Left-aligned and set large: the headline is the composition, not a caption over a picture. */}
+      <h1 className="flex flex-col items-start text-[clamp(2.6rem,6.4vw,6.25rem)] leading-none">
+        <StrokeText text="Websites and IT" delay={0.2} {...line} />{" "}
         <StrokeText
-          text="Calgary businesses."
-          trigger="mount"
-          start={loaded}
-          delay={0.6}
-          drawDuration={1.1}
-          stagger={0.03}
-          replayOnHover
-          className="-mt-[0.16em]"
+          text="for Calgary"
+          delay={0.45}
+          {...line}
+          className="-mt-[0.14em]"
+          fillClassName="fill-accent"
+          strokeClassName="stroke-ink/70"
+        />{" "}
+        <StrokeText
+          text="businesses."
+          delay={0.7}
+          {...line}
+          className="-mt-[0.14em]"
           fillClassName="fill-accent"
           strokeClassName="stroke-ink/70"
         />
       </h1>
 
-      <motion.p {...rise(1.1)} className="mt-6 max-w-[34rem] text-lg leading-relaxed text-muted md:text-xl">
+      <motion.p {...rise(1.1)} className="mt-8 max-w-[27rem] text-lg leading-relaxed text-muted md:text-xl">
         {heroLine}
       </motion.p>
 
-      <motion.div {...rise(1.25)} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+      <motion.div {...rise(1.25)} className="mt-9 flex flex-wrap items-center gap-3">
         <Magnetic>
           <ButtonLink href="#contact" className="h-12 px-6 text-[15px]">
             Start a project
@@ -74,20 +68,75 @@ function HeroCopy() {
   );
 }
 
+function Reading({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <span className="flex items-baseline gap-2">
+      <span className="sr-only">{label}:</span>
+      {children}
+    </span>
+  );
+}
+
+// Live proof along the bottom of the first screen, measured by this site's own server.
+function LiveBar() {
+  const loaded = useLoaderDone();
+  const status = useSiteStatus();
+  const time = useCalgaryTime();
+  const tempC = useCalgaryTemp();
+
+  const sites = status.kind === "ready" ? status.data.sites : [];
+  const up = sites.filter((s) => s.ok);
+  const avg = up.length ? Math.round(up.reduce((sum, s) => sum + (s.ms ?? 0), 0) / up.length) : null;
+  const allUp = status.kind === "ready" && up.length === sites.length;
+
+  return (
+    <motion.div
+      aria-label="Live status"
+      initial={{ opacity: 0 }}
+      animate={loaded ? { opacity: 1 } : undefined}
+      transition={{ duration: 0.8, delay: 1.5 }}
+      className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line py-5 font-mono text-[12px] text-muted"
+    >
+      <Reading label="Client sites">
+        <span className="relative flex size-1.5 self-center" aria-hidden>
+          {allUp && <span className="absolute inset-0 animate-ping rounded-full bg-live opacity-60 motion-reduce:hidden" />}
+          <span className={`relative size-1.5 rounded-full ${status.kind === "ready" ? (allUp ? "bg-live" : "bg-[#f87171]") : "bg-soft"}`} />
+        </span>
+        <span className="text-ink">
+          {status.kind === "ready"
+            ? `${up.length}/${sites.length} client sites online`
+            : status.kind === "error"
+              ? "Live status unavailable"
+              : `Checking ${clientCount} client sites`}
+        </span>
+      </Reading>
+      {avg !== null && (
+        <Reading label="Average response">
+          <span className="tabular-nums">{avg} ms average response</span>
+        </Reading>
+      )}
+      <Reading label="Calgary time">
+        <span>
+          Calgary <time className="tabular-nums text-ink">{time ?? "--:--:--"}</time>
+        </span>
+      </Reading>
+      <Reading label="Temperature">
+        <span className="tabular-nums">{tempC === null ? "--°C" : `${tempC}°C`}</span>
+      </Reading>
+      <span className="text-soft lg:ml-auto">Measured live by this site&apos;s server</span>
+    </motion.div>
+  );
+}
+
 export function Hero() {
-  const reduce = useReducedMotion();
   const { theme } = useTheme();
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const current = projects[active];
-  const next = () => setActive((i) => (i + 1) % projects.length);
 
   return (
     <section id="top" className="relative isolate overflow-hidden">
-      {/* React Bits Ghost Fibers, tuned to the brand violet. The mask fades every edge into the page. */}
+      {/* React Bits Ghost Fibers, weighted to the right so the light sits behind the client sites. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[115dvh] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_38%,black_35%,transparent_78%)]"
+        className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_70%_80%_at_72%_40%,black_30%,transparent_80%)]"
       >
         {theme === "dark" ? (
           <GhostFibers lineColor="#221548" glowColor="#5b3ad6" blueBoost={1.05} brightness={1.5} grain={0.04} dpr={0.75} fps={40} />
@@ -97,98 +146,16 @@ export function Hero() {
       </div>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-[55%] -z-10 mx-auto h-[640px] max-w-5xl rounded-full bg-accent-fill/15 blur-[140px]"
+        className="pointer-events-none absolute right-[-10%] top-[20%] -z-10 h-[620px] w-[760px] rounded-full bg-accent-fill/15 blur-[140px]"
       />
 
-      <ContainerScroll
-        titleComponent={<HeroCopy />}
-        footer={
-          <div
-            className="flex flex-col items-center justify-between gap-4 md:flex-row"
-            onPointerEnter={() => setPaused(true)}
-            onPointerLeave={() => setPaused(false)}
-            onFocus={() => setPaused(true)}
-            onBlur={() => setPaused(false)}
-          >
-            <div role="tablist" aria-label="Recent projects" className="flex flex-wrap justify-center gap-1 rounded-full border border-line bg-surface/70 p-1 backdrop-blur">
-              {projects.map((p, i) => {
-                const selected = i === active;
-                return (
-                  <button
-                    key={p.name}
-                    type="button"
-                    role="tab"
-                    id={`hero-tab-${i}`}
-                    aria-selected={selected}
-                    aria-controls="hero-screen"
-                    onClick={() => setActive(i)}
-                    className={`relative overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ${
-                      selected ? "text-ink" : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    {selected && (
-                      <motion.span
-                        layoutId="hero-tab"
-                        className="absolute inset-0 rounded-full border border-line-strong bg-surface-strong"
-                        transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 34 }}
-                      />
-                    )}
-                    <span className="relative">{p.name}</span>
-                    {selected && (
-                      <span
-                        key={active}
-                        aria-hidden
-                        onAnimationEnd={next}
-                        style={{ animationDuration: `${ROTATE_MS}ms`, animationPlayState: paused ? "paused" : "running" }}
-                        className="absolute inset-x-4 bottom-1 h-px origin-left animate-[hero-progress_linear_forwards] bg-accent motion-reduce:hidden"
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <a
-              href={current.href}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink"
-            >
-              <span className="size-1.5 rounded-full bg-live" aria-hidden />
-              <span>
-                {current.relation === "Client work" ? "Live at" : "Lab project at"}{" "}
-                <span className="font-medium text-ink">{current.domain}</span>
-              </span>
-              <ArrowUpRightIcon size={14} weight="bold" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
-          </div>
-        }
-      >
-        <div id="hero-screen" role="tabpanel" aria-labelledby={`hero-tab-${active}`} className="absolute inset-0">
-          {/* All screens stay mounted and cross-fade, so the next site is already decoded when it appears. */}
-          {projects.map((p, i) => (
-            <motion.div
-              key={p.name}
-              className="absolute inset-0"
-              aria-hidden={i !== active}
-              initial={false}
-              animate={{ opacity: i === active ? 1 : 0, scale: i === active || reduce ? 1 : 1.015 }}
-              transition={{ duration: 0.9, ease }}
-            >
-              <Image
-                src={p.image}
-                alt={i === active ? `${p.name} homepage, built by AHMXD` : ""}
-                fill
-                preload={i === 0}
-                loading="eager"
-                sizes="(min-width: 1024px) 1000px, 94vw"
-                className="object-cover object-top"
-              />
-            </motion.div>
-          ))}
+      <div className="mx-auto flex max-w-[1400px] flex-col px-4 pb-20 sm:px-6 lg:min-h-[100dvh] lg:px-10 lg:pb-0">
+        <div className="grid flex-1 items-center gap-16 pt-32 pb-12 lg:grid-cols-12 lg:gap-10 lg:pt-28">
+          <HeroCopy className="lg:col-span-6 xl:col-span-6" />
+          <HeroWindows className="lg:col-span-6 xl:col-span-6" />
         </div>
-      </ContainerScroll>
-
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-bg" />
+        <LiveBar />
+      </div>
     </section>
   );
 }

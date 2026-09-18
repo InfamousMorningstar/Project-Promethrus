@@ -2,10 +2,8 @@
 
 import { motion, useInView } from "motion/react";
 import { useReducedMotion } from "@/components/use-reduced-motion";
-import { useEffect, useRef, useState } from "react";
-import type { StatusPayload } from "@/app/api/status/route";
-
-type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; data: StatusPayload };
+import { useRef } from "react";
+import { useSiteStatus } from "../live-data";
 
 function minutesAgo(iso: string) {
   const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
@@ -39,19 +37,8 @@ function Trace({ ok, delay }: { ok: boolean; delay: number }) {
 export function StatusBoard() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "200px" });
-  const [state, setState] = useState<State>({ kind: "loading" });
-
-  useEffect(() => {
-    if (!inView) return;
-    const controller = new AbortController();
-    fetch("/api/status", { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: StatusPayload) => setState({ kind: "ready", data }))
-      .catch((err) => {
-        if (err?.name !== "AbortError") setState({ kind: "error" });
-      });
-    return () => controller.abort();
-  }, [inView]);
+  // Shared with the hero's live bar, so this usually reuses the reading already on the page.
+  const state = useSiteStatus(inView);
 
   const sites = state.kind === "ready" ? state.data.sites : [];
   const down = sites.filter((s) => !s.ok).length;
