@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-import { needs, payments, site, timelines } from "@/lib/site";
+import { needs, payments, site } from "@/lib/site";
 import { onPlanAnnounced } from "./plan-intent";
 import { DecryptedText } from "./reactbits/decrypted-text";
 import { Reveal } from "./reveal";
@@ -52,7 +52,7 @@ function Chip({
 }) {
   return (
     <label
-      className={`relative inline-flex cursor-pointer select-none items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
+      className={`relative inline-flex min-h-11 cursor-pointer select-none items-center gap-2 rounded-full border px-4 py-2 text-[15px] font-medium transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
         checked
           ? "border-accent bg-accent-soft text-accent"
           : "border-line-strong text-muted hover:border-soft hover:text-ink"
@@ -69,9 +69,8 @@ export function Contact() {
   const reduce = useReducedMotion();
   const { copied, copy } = useCopy();
   const [selected, setSelected] = useState<string[]>([]);
-  const [timeline, setTimeline] = useState<string>("");
   const [payment, setPayment] = useState<string>("");
-  const [form, setForm] = useState({ name: "", business: "", email: "", details: "" });
+  const [form, setForm] = useState({ name: "", email: "", details: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [brief, setBrief] = useState<string | null>(null);
 
@@ -112,14 +111,12 @@ export function Contact() {
       return;
     }
 
-    const who = form.business.trim() || form.name.trim();
+    const who = form.name.trim();
     const header = [
-      `Name: ${form.name.trim()}`,
-      form.business.trim() && `Business: ${form.business.trim()}`,
+      `Name: ${who}`,
       `Reply to: ${form.email.trim()}`,
       `Needs: ${selected.join(", ")}`,
       payment && `Payment: ${payment}`,
-      timeline && `Timeline: ${timeline}`,
     ].filter(Boolean);
     const text = `${header.join("\n")}\n\n${form.details.trim()}`;
 
@@ -141,18 +138,18 @@ export function Contact() {
   });
 
   return (
-    <section id="contact" aria-labelledby="contact-title" className="relative isolate scroll-mt-20 overflow-hidden">
+    <section id="contact" aria-labelledby="contact-title" className="relative isolate scroll-mt-24 overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(42%_48%_at_78%_48%,rgb(124_58_237/0.13),transparent_100%)]"
       />
-      <div className="mx-auto grid max-w-[1400px] gap-14 px-4 py-24 sm:px-6 md:py-32 lg:grid-cols-12 lg:gap-16 lg:px-10">
+      <div className="mx-auto grid max-w-[1400px] gap-12 px-4 py-20 sm:px-6 md:py-24 lg:grid-cols-12 lg:gap-16 lg:px-10">
         <div className="lg:col-span-7">
           <Reveal>
             <p className="label text-accent">
               <DecryptedText text="Start a project" animateOn="view" />
             </p>
-            <SectionTitle id="contact-title" lines={["Let's build", "something"]} className="mt-5" />
+            <SectionTitle id="contact-title" lines={["Let's build", "something"]} className="mt-5" sizeClassName="text-[clamp(2.25rem,4.6vw,4rem)]" />
             <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
               Pick what you need. Your email app writes the rest.
             </p>
@@ -204,10 +201,10 @@ export function Contact() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-12 grid gap-8"
+                className="mt-10 grid gap-7"
               >
                 <fieldset data-invalid={errors.needs ? true : undefined} aria-describedby="needs-error">
-                  <legend className="mb-3 font-semibold">What do you need?</legend>
+                  <legend className="mb-3 text-lg font-semibold">What do you need?</legend>
                   <div className="flex flex-wrap gap-2">
                     {needs.map((n) => (
                       <Chip
@@ -231,7 +228,7 @@ export function Contact() {
                 </fieldset>
 
                 <fieldset>
-                  <legend className="mb-3 font-semibold">
+                  <legend className="mb-3 text-lg font-semibold">
                     How would you like to pay? <span className="font-normal text-soft">(optional)</span>
                   </legend>
                   <div className="flex flex-wrap gap-2">
@@ -248,27 +245,9 @@ export function Contact() {
                   </div>
                 </fieldset>
 
-                <fieldset>
-                  <legend className="mb-3 font-semibold">
-                    Timeline <span className="font-normal text-soft">(optional)</span>
-                  </legend>
-                  <div className="flex flex-wrap gap-2">
-                    {timelines.map((t) => (
-                      <Chip
-                        key={t}
-                        type="radio"
-                        name="timeline"
-                        value={t}
-                        checked={timeline === t}
-                        onChange={() => setTimeline(t)}
-                      />
-                    ))}
-                  </div>
-                </fieldset>
-
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="contact-name" className="font-semibold">
+                    <label htmlFor="contact-name" className="text-lg font-semibold">
                       Your name
                     </label>
                     <input {...field("name")} autoComplete="name" className={inputClass} />
@@ -282,37 +261,27 @@ export function Contact() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="contact-business" className="font-semibold">
-                      Business <span className="font-normal text-soft">(optional)</span>
+                    <label htmlFor="contact-email" className="text-lg font-semibold">
+                      Email
                     </label>
-                    <input {...field("business")} autoComplete="organization" className={inputClass} />
-                    <p id="contact-business-hint" className="sr-only">
-                      Optional
+                    <input {...field("email")} type="email" autoComplete="email" inputMode="email" className={inputClass} />
+                    <p id="contact-email-hint" className="text-[15px] text-muted">
+                      Where the reply should go.
                     </p>
+                    {errors.email && (
+                      <p id="contact-email-error" className="text-sm text-[#dc2626] dark:text-[#f87171]">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="contact-email" className="font-semibold">
-                    Email
-                  </label>
-                  <input {...field("email")} type="email" autoComplete="email" inputMode="email" className={inputClass} />
-                  <p id="contact-email-hint" className="text-sm text-soft">
-                    Where the reply should go.
-                  </p>
-                  {errors.email && (
-                    <p id="contact-email-error" className="text-sm text-[#dc2626] dark:text-[#f87171]">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="contact-details" className="font-semibold">
+                  <label htmlFor="contact-details" className="text-lg font-semibold">
                     About the project
                   </label>
                   <textarea {...field("details")} rows={5} className={`${inputClass} resize-y`} />
-                  <p id="contact-details-hint" className="text-sm text-soft">
+                  <p id="contact-details-hint" className="text-[15px] text-muted">
                     What it should do, who it is for, and anything you already have (a domain, a logo, an old site).
                   </p>
                   {errors.details && (
@@ -346,7 +315,7 @@ export function Contact() {
           </AnimatePresence>
         </div>
 
-        <aside className="lg:col-span-5 lg:pt-40" aria-label="Other ways to reach AHMXD">
+        <aside className="hidden lg:col-span-5 lg:block lg:pt-28" aria-label="Other ways to reach AHMXD">
           <Reveal delay={0.1}>
             <div className="rounded-2xl border border-line bg-surface p-7 shadow-panel md:p-9">
               <h3 className="text-xl font-bold tracking-[-0.02em]">Prefer to write it yourself?</h3>

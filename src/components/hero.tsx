@@ -60,8 +60,8 @@ function HeroCopy({ className = "" }: { className?: string }) {
             <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-300 group-hover:translate-x-0.5" />
           </ButtonLink>
         </Magnetic>
-        <ButtonLink href="#work" variant="ghost" className="h-12 px-6 text-[15px]">
-          See the work
+        <ButtonLink href="#pricing" variant="ghost" className="h-12 px-6 text-[15px]">
+          See prices
         </ButtonLink>
       </motion.div>
     </div>
@@ -95,7 +95,7 @@ function LiveBar() {
       initial={{ opacity: 0 }}
       animate={loaded ? { opacity: 1 } : undefined}
       transition={{ duration: 0.8, delay: 1.5 }}
-      className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line py-5 font-mono text-[12px] text-muted"
+      className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line py-5 font-mono text-[14px] text-muted"
     >
       <Reading label="Client sites">
         <span className="relative flex size-1.5 self-center" aria-hidden>

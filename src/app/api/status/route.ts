@@ -19,7 +19,7 @@ async function probe(url: string): Promise<Pick<SiteStatus, "ok" | "ms">> {
   const init = {
     redirect: "follow",
     cache: "no-store",
-    headers: { "user-agent": "AHMXD-status/1.0 (+https://ahmxd.net)" },
+    headers: { "user-agent": "AHMXD-status/1.0 (+https://ahmxdtechnologies.ca)" },
   } as const;
   const start = performance.now();
   try {

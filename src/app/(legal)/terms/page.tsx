@@ -142,27 +142,61 @@ const sections: LegalSection[] = [
     title: "Plans and payments",
     body: (
       <>
-        <h3>Quotes</h3>
+        <h3>Quotes and deposits</h3>
         <p>
-          Every project starts with a written quote. Build work begins once you approve the design and the quote. Prices
-          are in Canadian dollars, plus any applicable taxes.
+          Every project starts with a fixed written quote for an agreed scope. Prices are in Canadian dollars, plus any
+          applicable taxes. Design work starts once you accept the quote and pay the deposit. The deposit reserves time in
+          AHMXD&apos;s schedule and covers the discovery, design and mockup work, so it is not refundable once design work
+          has begun.
         </p>
 
         <h3>Paying upfront</h3>
         <p>
-          The build fee is paid in two parts: half when you approve the design, and half at launch. Hosting, database and
-          updates are billed monthly from {cad(terms.hosting)} a month for as long as AHMXD hosts the site.
+          The build fee is paid in two parts: a {terms.depositPercent}% deposit before design starts, and the remaining{" "}
+          {100 - terms.depositPercent}% at launch, before the site goes live. Custom projects may use the milestone payments
+          set out in their quote. Hosting, database and updates are billed monthly from {cad(terms.hosting)} a month for as
+          long as AHMXD hosts the site.
         </p>
 
         <h3>Paying monthly</h3>
         <ul>
-          <li>There is no upfront fee. The first monthly payment is due when you approve the design.</li>
-          <li>Hosting, database, updates and small edits are included.</li>
+          <li>
+            Your first {terms.monthlyDepositMonths} months are paid upfront, before design starts, and are not refundable once
+            design work has begun. Monthly billing continues from there.
+          </li>
+          <li>
+            Hosting, database, updates and small edits (up to {terms.smallEditMinutes} minutes a month) are included.
+          </li>
           <li>
             The minimum term is {terms.minimumMonths} months, unless your quote says otherwise. After that, you can cancel
             with {terms.cancelNoticeDays} days&apos; written notice.
           </li>
         </ul>
+
+        <h3>Scope, revisions and changes</h3>
+        <ul>
+          <li>
+            The price covers the scope in your accepted quote. Anything outside it, such as extra pages, features or
+            content, is quoted separately and only starts once you agree to the new price in writing.
+          </li>
+          <li>
+            Each plan includes a set number of design revision rounds: one on Starter, two on Business, and as quoted on
+            Custom. A revision adjusts work already presented; a new layout or direction after approval is new work.
+            Extra rounds are billed at {cad(terms.hourly)} an hour.
+          </li>
+          <li>
+            Launch is sign-off. Changes requested after launch are not part of the original price. Small edits such as
+            swapping text or photos (up to {terms.smallEditMinutes} minutes a month) are included with monthly plans and
+            Hosting &amp; care; anything more is quoted separately or billed at {cad(terms.hourly)} an hour.
+          </li>
+        </ul>
+
+        <h3>Content and delays</h3>
+        <p>
+          You are responsible for supplying your content (text, photos and logos) and feedback on time. If a project waits
+          more than {terms.pauseDays} days for your content, feedback or approval, AHMXD may pause it. Paused projects
+          resume on a new schedule when you are ready, and payments already made are not refunded.
+        </p>
 
         <h3>Missed payments</h3>
         <p>
@@ -262,6 +296,7 @@ export default function TermsPage() {
         "Your domain, your content and your data stay yours.",
         "Owning the code outright is possible through a written assignment, priced case by case.",
         "Hosting and databases stay with AHMXD, on Vercel and Supabase.",
+        `Every project starts with a fixed quote and a deposit. Work after launch, beyond small edits, is quoted separately.`,
         `Monthly plans have a ${terms.minimumMonths}-month minimum, and a site may be paused after ${terms.graceDays} days' notice of a missed payment.`,
       ]}
       sections={sections}

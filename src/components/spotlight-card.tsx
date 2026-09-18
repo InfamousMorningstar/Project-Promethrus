@@ -5,7 +5,7 @@ import { useReducedMotion } from "@/components/use-reduced-motion";
 import type { ReactNode } from "react";
 
 // Card whose border and surface pick up a soft violet light under the cursor.
-export function SpotlightCard({ children, className }: { children: ReactNode; className?: string }) {
+export function SpotlightCard({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   const reduce = useReducedMotion();
   const x = useMotionValue(-400);
   const y = useMotionValue(-400);
@@ -14,6 +14,7 @@ export function SpotlightCard({ children, className }: { children: ReactNode; cl
 
   return (
     <motion.article
+      id={id}
       data-stroke-hover
       className={`group/card relative isolate overflow-hidden rounded-2xl border border-line bg-surface shadow-panel ${className ?? ""}`}
       initial={{ opacity: 0, y: 24 }}

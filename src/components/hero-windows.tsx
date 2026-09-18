@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRightIcon } from "@phosphor-icons/react";
+import { ArrowUpRightIcon, PauseIcon, PlayIcon } from "@phosphor-icons/react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
@@ -45,6 +45,8 @@ export function HeroWindows({ className = "" }: { className?: string }) {
   const loaded = useLoaderDone();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  // Visitors can stop the rotation outright (WCAG 2.2.2), separate from the hover pause.
+  const [stopped, setStopped] = useState(false);
   const n = clients.length;
   const next = () => setActive((i) => (i + 1) % n);
 
@@ -127,53 +129,66 @@ export function HeroWindows({ className = "" }: { className?: string }) {
         initial={{ opacity: 0 }}
         animate={loaded ? { opacity: 1 } : undefined}
         transition={{ duration: 0.8, delay: 1.2 }}
-        className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        className="mt-6"
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
       >
-        <div role="tablist" aria-label="Client sites" className="flex flex-wrap gap-1">
-          {clients.map((p, i) => {
-            const selected = i === active;
-            return (
-              <button
-                key={p.name}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                aria-controls="hero-screen"
-                onClick={() => setActive(i)}
-                className={`relative rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-300 ${
-                  selected ? "text-ink" : "text-muted hover:text-ink"
-                }`}
-              >
-                {p.name}
-                {selected && (
-                  <span
-                    key={active}
-                    aria-hidden
-                    onAnimationEnd={next}
-                    // Held until the loading screen opens, so the first site gets its full turn.
-                    style={{ animationDuration: `${ROTATE_MS}ms`, animationPlayState: paused || !loaded ? "paused" : "running" }}
-                    className="absolute inset-x-3 bottom-0.5 h-px origin-left animate-[hero-progress_linear_forwards] bg-accent motion-reduce:hidden"
-                  />
-                )}
-              </button>
-            );
-          })}
+        <div className="flex flex-wrap items-center gap-1">
+          <div role="tablist" aria-label="Client sites" className="flex flex-wrap gap-1">
+            {clients.map((p, i) => {
+              const selected = i === active;
+              return (
+                <button
+                  key={p.name}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls="hero-screen"
+                  onClick={() => setActive(i)}
+                  className={`relative inline-flex min-h-11 items-center rounded-full px-3 text-[15px] font-medium transition-colors duration-300 ${
+                    selected ? "text-ink" : "text-muted hover:text-ink"
+                  }`}
+                >
+                  {p.name}
+                  {selected && (
+                    <span
+                      key={active}
+                      aria-hidden
+                      onAnimationEnd={next}
+                      // Held until the loading screen opens, so the first site gets its full turn.
+                      style={{ animationDuration: `${ROTATE_MS}ms`, animationPlayState: paused || stopped || !loaded ? "paused" : "running" }}
+                      className="absolute inset-x-3 bottom-1.5 h-px origin-left animate-[hero-progress_linear_forwards] bg-accent motion-reduce:hidden"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={() => setStopped((v) => !v)}
+            aria-pressed={stopped}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-[15px] font-medium text-muted transition-colors hover:text-ink motion-reduce:hidden"
+          >
+            {stopped ? <PlayIcon size={14} weight="fill" aria-hidden /> : <PauseIcon size={14} weight="fill" aria-hidden />}
+            {stopped ? "Play" : "Pause"}
+          </button>
         </div>
-        <a
-          href={current.href}
-          target="_blank"
-          rel="noreferrer"
-          className="group inline-flex shrink-0 items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-        >
-          Visit <span className="font-medium text-ink">{current.domain}</span>
-          <ArrowUpRightIcon
-            size={14}
-            weight="bold"
-            className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-          />
-        </a>
+        {/* The chosen site in one sentence, with a plain link to visit it. */}
+        <p className="mt-2 text-[16px] leading-relaxed text-muted">
+          <span aria-live="polite">
+            <span className="font-semibold text-ink">{current.name}:</span> {current.summary}
+          </span>{" "}
+          <a
+            href={current.href}
+            target="_blank"
+            rel="noreferrer"
+            className="group inline-flex items-center gap-1 font-medium text-ink underline decoration-accent/50 underline-offset-4 transition-colors hover:text-accent"
+          >
+            Visit {current.domain}
+            <ArrowUpRightIcon size={14} weight="bold" aria-hidden className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </a>
+        </p>
       </motion.div>
     </div>
   );

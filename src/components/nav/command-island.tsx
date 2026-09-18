@@ -4,19 +4,18 @@
   Command island: the site's navigation.
   Collapsed, it is a small capsule showing where you are, with the page's scroll progress traced
   around its edge. Click it, press Ctrl/Cmd+K or "/", and it morphs into a command palette:
-  type to filter, arrows to move, Enter to go, digits 1-6 to jump straight to a section.
+  type to filter, arrows to move, Enter to go, digits 1-5 to jump straight to a section.
+  On desktop it stays out of the way while the header's text links are on screen.
 */
 import {
   ArrowElbowDownLeftIcon,
   ArrowUpIcon,
   ArrowUpRightIcon,
-  BriefcaseIcon,
   CircleHalfIcon,
   EnvelopeSimpleIcon,
   ListIcon,
   MagnifyingGlassIcon,
   PaperPlaneTiltIcon,
-  PathIcon,
   QuestionIcon,
   StackIcon,
   TagIcon,
@@ -174,6 +173,14 @@ export function CommandIsland() {
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const [atTop, setAtTop] = useState(true);
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (y) => setAtTop(y < 120));
+  // Pages opened part-way down (a #link, a reload) start with the island showing.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setAtTop(window.scrollY < 120));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   const capsule = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -205,12 +212,10 @@ export function CommandIsland() {
   const commands = useMemo<Command[]>(
     () => [
       { id: "services", label: "Services", hint: "What I build", group: "Go to", icon: <StackIcon {...ICON} />, shortcut: "1", keywords: "websites apps it hosting automation", action: { kind: "section", target: "services" } },
-      { id: "work", label: "Work", hint: "Live client sites", group: "Go to", icon: <BriefcaseIcon {...ICON} />, shortcut: "2", keywords: "projects portfolio clients", action: { kind: "section", target: "work" } },
-      { id: "process", label: "Process", hint: "How a project runs", group: "Go to", icon: <PathIcon {...ICON} />, shortcut: "3", keywords: "steps timeline", action: { kind: "section", target: "process" } },
-      { id: "pricing", label: "Pricing", hint: "Upfront or monthly", group: "Go to", icon: <TagIcon {...ICON} />, shortcut: "4", keywords: "cost price plans monthly payment", action: { kind: "section", target: "pricing" } },
-      { id: "studio", label: "Studio", hint: "Meet the engineer", group: "Go to", icon: <UserIcon {...ICON} />, shortcut: "5", keywords: "about salman backup handover", action: { kind: "section", target: "studio" } },
-      { id: "faq", label: "FAQ", hint: "Common questions", group: "Go to", icon: <QuestionIcon {...ICON} />, shortcut: "6", keywords: "ownership payment unavailable", action: { kind: "section", target: "faq" } },
-      { id: "contact", label: "Start a project", hint: "Send a brief", group: "Go to", icon: <PaperPlaneTiltIcon {...ICON} />, shortcut: "7", keywords: "contact hire quote", action: { kind: "section", target: "contact" } },
+      { id: "pricing", label: "Pricing", hint: "Plans and how it works", group: "Go to", icon: <TagIcon {...ICON} />, shortcut: "2", keywords: "cost price plans monthly payment process steps", action: { kind: "section", target: "pricing" } },
+      { id: "about", label: "About", hint: "Who you'll work with", group: "Go to", icon: <UserIcon {...ICON} />, shortcut: "3", keywords: "salman security promises backup handover", action: { kind: "section", target: "about" } },
+      { id: "faq", label: "FAQ", hint: "Common questions", group: "Go to", icon: <QuestionIcon {...ICON} />, shortcut: "4", keywords: "ownership payment", action: { kind: "section", target: "faq" } },
+      { id: "contact", label: "Start a project", hint: "Send a brief", group: "Go to", icon: <PaperPlaneTiltIcon {...ICON} />, shortcut: "5", keywords: "contact hire quote", action: { kind: "section", target: "contact" } },
       { id: "theme", label: `Switch to ${theme === "dark" ? "light" : "dark"} theme`, hint: "Appearance", group: "Do", icon: <CircleHalfIcon {...ICON} />, keywords: "dark light mode", action: { kind: "theme" } },
       { id: "email", label: "Email Salman", hint: site.email, group: "Do", icon: <EnvelopeSimpleIcon {...ICON} />, keywords: "mail message", action: { kind: "email" } },
       { id: "portfolio", label: "Open the portfolio", hint: "portfolio.ahmxd.net", group: "Do", icon: <ArrowUpRightIcon {...ICON} />, external: true, keywords: "case studies engineering", action: { kind: "portfolio" } },
@@ -294,7 +299,7 @@ export function CommandIsland() {
     } else if (e.key === "Escape") {
       e.preventDefault();
       close();
-    } else if (!query && /^[1-7]$/.test(e.key)) {
+    } else if (!query && /^[1-5]$/.test(e.key)) {
       e.preventDefault();
       run(commands.find((c) => c.shortcut === e.key));
     }
@@ -323,7 +328,10 @@ export function CommandIsland() {
       </AnimatePresence>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 lg:bottom-auto lg:top-4">
-        <div className="pointer-events-auto relative">
+        <div
+          data-attop={atTop && !open}
+          className="pointer-events-auto relative transition-[opacity,translate,visibility] duration-500 ease-out-expo lg:data-[attop=true]:invisible lg:data-[attop=true]:-translate-y-4 lg:data-[attop=true]:opacity-0"
+        >
           <motion.div
             ref={capsule}
             layout
@@ -341,7 +349,7 @@ export function CommandIsland() {
                   onClick={() => setOpen(true)}
                   aria-haspopup="dialog"
                   aria-expanded={false}
-                  aria-label={`Open navigation, current section ${label}`}
+                  aria-label={`Menu, current section ${label}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -351,14 +359,15 @@ export function CommandIsland() {
                   <span className="grid size-9 place-items-center rounded-full bg-surface-strong">
                     <LogoMark className="size-5" title="" />
                   </span>
-                  <span className="min-w-[8.5ch] text-left font-mono text-[12px] tracking-[0.08em] uppercase">
+                  <span className="min-w-[8.5ch] text-left font-mono text-[13px] tracking-[0.06em] uppercase">
                     <ScrambleLabel text={label} />
                   </span>
                   <span className="hidden items-center gap-1 rounded-md border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-soft lg:inline-flex">
                     {mac ? "⌘" : "Ctrl"} K
                   </span>
-                  <span className="grid size-9 place-items-center rounded-full bg-accent-fill text-accent-contrast lg:size-8">
-                    <ListIcon size={16} weight="bold" />
+                  <span className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent-fill px-3.5 text-[14px] font-semibold text-accent-contrast">
+                    <ListIcon size={16} weight="bold" aria-hidden />
+                    Menu
                   </span>
                 </motion.button>
               ) : (
@@ -462,7 +471,7 @@ export function CommandIsland() {
                   <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5 font-mono text-[10.5px] text-soft">
                     <span className="hidden sm:inline">
                       <kbd className="text-muted">↑↓</kbd> move <kbd className="ml-2 text-muted">↵</kbd> go{" "}
-                      <kbd className="ml-2 text-muted">1-6</kbd> jump
+                      <kbd className="ml-2 text-muted">1-5</kbd> jump
                     </span>
                     <span className="flex items-center gap-2">
                       <LogoMark className="size-3.5" title="" />

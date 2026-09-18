@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-/* Screens with room for the curtain-reveal footer (it is pinned to the viewport, so it must fit). */
-@custom-variant curtain (@media (min-width: 1024px) and (min-height: 860px));
 
 /*
   Tokens mirror portfolio.ahmxd.net: zinc-950 base, violet as the single brand

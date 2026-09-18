@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 export const SECTIONS = [
   { id: "top", label: "Home" },
   { id: "services", label: "Services" },
-  { id: "work", label: "Work" },
-  { id: "process", label: "Process" },
   { id: "pricing", label: "Pricing" },
-  { id: "studio", label: "Studio" },
+  { id: "about", label: "About" },
   { id: "faq", label: "FAQ" },
   { id: "contact", label: "Contact" },
 ] as const;

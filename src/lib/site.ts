@@ -1,7 +1,7 @@
 export const site = {
   name: "AHMXD Technologies",
   shortName: "AHMXD",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://ahmxd.net",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://ahmxdtechnologies.ca",
   description:
     "Websites and IT for Calgary businesses. Hand-built sites you can pay for upfront or monthly, plus web apps, hosting, office IT and automation.",
   founder: "Salman Ahmad",
@@ -21,11 +21,10 @@ export const site = {
 
 export const navItems = [
   { id: "services", label: "Services" },
-  { id: "work", label: "Work" },
-  { id: "process", label: "Process" },
   { id: "pricing", label: "Pricing" },
-  { id: "studio", label: "Studio" },
+  { id: "about", label: "About" },
   { id: "faq", label: "FAQ" },
+  { id: "contact", label: "Contact" },
 ] as const;
 
 /* Pricing ----------------------------------------------------------------------------------
@@ -60,7 +59,7 @@ export const plans: Plan[] = [
       "One-page site with a contact or booking form",
       "Mobile-first and fast to load",
       "Google Business Profile setup",
-      "Local search basics and analytics",
+      "One round of design changes",
     ],
   },
   {
@@ -101,13 +100,22 @@ export const terms = {
   /** Monthly hosting and care for sites paid upfront. */
   hosting: 39,
   hourly: 75,
+  /** Share of an upfront build paid before any design work starts. */
+  depositPercent: 50,
+  /** Months a monthly plan pays upfront before design work starts. */
+  monthlyDepositMonths: 2,
+  /** Small edits included each month with monthly plans and Hosting & care. */
+  smallEditMinutes: 30,
+  /** Days a project can wait on the client before it is paused. */
+  pauseDays: 30,
 };
 
 export const billingNotes: Record<Billing, { title: string; notes: string[] }> = {
   upfront: {
     title: "Paying upfront",
     notes: [
-      "A one-time build fee: half when you approve the design, half at launch.",
+      `A ${terms.depositPercent}% deposit books your project and starts the design. It covers the design and mockup work, so it is not refundable once design begins.`,
+      `The other ${100 - terms.depositPercent}% at launch, before the site goes live.`,
       `Hosting, database and updates: from ${cad(terms.hosting)} a month.`,
       "A licence to use the site for your business. The code stays AHMXD's.",
     ],
@@ -115,8 +123,8 @@ export const billingNotes: Record<Billing, { title: string; notes: string[] }> =
   monthly: {
     title: "Paying monthly",
     notes: [
-      "$0 to start. The first payment is due when you approve the design.",
-      "Hosting, database, updates and small edits are included.",
+      `Your first ${terms.monthlyDepositMonths} months are paid upfront to book your project and start the design. They are not refundable once design begins.`,
+      `Hosting, database, updates and small edits (up to ${terms.smallEditMinutes} minutes a month) are included.`,
       "The same licence to use the site. The code stays AHMXD's.",
       `${terms.minimumMonths}-month minimum, then cancel any time with ${terms.cancelNoticeDays} days' written notice.`,
       `Miss a payment and the site may be paused after ${terms.graceDays} days' notice. Pay, and it's back, usually the same day.`,
@@ -138,10 +146,19 @@ export const ownership: { item: string; owner: Owner; note: string }[] = [
 
 export const buyoutNote = "Want to own the code outright? A full buyout is possible. It's priced case by case.";
 
+// What the price covers, so nobody expects a redesign or new pages for free after launch.
+export const scopeNotes = [
+  "Your quote is a fixed price for the scope we agree in writing. It does not change mid-build unless you add to it.",
+  "Design changes are limited to the rounds in your plan: one on Starter, two on Business, and as quoted on Custom. Extra rounds are billed hourly.",
+  "Launch is sign-off. After launch, new pages, new features, new content or a redesign are new work, quoted separately.",
+  `Small edits after launch, such as swapping text or photos (up to ${terms.smallEditMinutes} minutes a month), are included with monthly plans and Hosting & care. Anything more is ${cad(terms.hourly)} an hour.`,
+  `If a project waits more than ${terms.pauseDays} days for your content or feedback, it is paused, and the schedule is reset when you are ready.`,
+];
+
 export type Extra = { name: string; amount: number; from?: boolean; unit?: string; body: string };
 
 export const extras: Extra[] = [
-  { name: "Hosting & care", amount: terms.hosting, unit: "a month", body: "Hosting, database, updates and small edits for sites paid upfront." },
+  { name: "Hosting & care", amount: terms.hosting, unit: "a month", body: `Hosting, database, updates and small edits (up to ${terms.smallEditMinutes} minutes a month) for sites paid upfront.` },
   { name: "IT support", amount: 30, from: true, unit: "per user", body: "Monthly help with computers, email, backups and security for your team." },
   { name: "Office IT setup", amount: 500, from: true, body: "Wi-Fi, shared storage, backups and secure remote access." },
   { name: "Automation", amount: 400, from: true, body: "Scripts and bots that take repeat work off your plate." },
@@ -152,21 +169,55 @@ const starter = plans[0];
 
 export const heroLine = `Hand-built sites from ${cad(starter.upfront)}, or ${cad(starter.monthly)} a month. Office IT from the same engineer.`;
 
-export const proof: { value: number; prefix?: string; label: string }[] = [
-  { value: 3, label: "Client sites live" },
-  { value: 100, label: "Google Lighthouse SEO score on every client site" },
-  { value: starter.monthly, prefix: "$", label: "A month for a hand-built site" },
-  { value: 1, label: "Business day to hear back" },
+export type Service = { icon: "website" | "app" | "it" | "automation"; title: string; body: string; price: string };
+
+// The four things AHMXD sells, shown as one short row under the hero.
+export const services: Service[] = [
+  {
+    icon: "website",
+    title: "Websites",
+    body: "Fast, mobile-first sites that turn visitors into calls.",
+    price: `From ${cad(starter.upfront)}, or ${cad(starter.monthly)} a month`,
+  },
+  {
+    icon: "app",
+    title: "Web apps",
+    body: "Bookings, inventory and dashboards with secure logins.",
+    price: `From ${cad(plans[2].upfront)}, or ${cad(plans[2].monthly)} a month`,
+  },
+  {
+    icon: "it",
+    title: "Office IT",
+    body: "Wi-Fi, storage, backups and secure remote access for your team.",
+    price: `Setup from ${cad(extras[2].amount)}, support from ${cad(extras[1].amount)} per user`,
+  },
+  {
+    icon: "automation",
+    title: "Automation",
+    body: "Scripts and bots that take repeat work off your plate.",
+    price: `From ${cad(extras[3].amount)}`,
+  },
 ];
 
 /* Security and continuity: how client sites and data are protected, including if the one
    engineer is unavailable. Each item is a promise AHMXD keeps on its own, with no outside
-   partner required. The Privacy Policy and Terms repeat these in legal wording. */
+   partner required. The Privacy Policy and Terms repeat these in legal wording.
+   The first three are shown up front in the About section; the rest sit behind "Show all". */
 export const continuity = [
   {
     icon: "twoFactor",
     title: "Two-factor on every account",
     body: "Every account that runs your site, from hosting and database to code, is locked with two-factor sign-in.",
+  },
+  {
+    icon: "key",
+    title: "Your domain, in your name",
+    body: "Your domain is always registered to you, so your web address can never be held back.",
+  },
+  {
+    icon: "lifebuoy",
+    title: "If AHMXD ever closes",
+    body: "Every client gets their site's code and files free, with the right to run them anywhere and 60 days to move.",
   },
   {
     icon: "encrypted",
@@ -184,9 +235,9 @@ export const continuity = [
     body: "If your data is ever exposed, you are told without unreasonable delay and helped through any report Alberta law requires.",
   },
   {
-    icon: "key",
-    title: "Your domain, in your name",
-    body: "Your domain is always registered to you, so your web address can never be held back.",
+    icon: "reply",
+    title: "Replies within a business day",
+    body: "A site that is down gets looked at the same day. Planned time off is announced ahead of time.",
   },
   {
     icon: "guide",
@@ -194,19 +245,9 @@ export const continuity = [
     body: "Every launch includes a plain-English guide to how your site is built and where it runs.",
   },
   {
-    icon: "reply",
-    title: "Replies within a business day",
-    body: "A site that is down gets looked at the same day. Planned time off is announced ahead of time.",
-  },
-  {
     icon: "code",
     title: "Standard tools",
     body: "Built with React and Next.js, which most web developers already know. No private page builder.",
-  },
-  {
-    icon: "lifebuoy",
-    title: "If AHMXD ever closes",
-    body: "Every client gets their site's code and files free, with the right to run them anywhere and 60 days to move.",
   },
 ] as const;
 
@@ -219,7 +260,7 @@ export const testimonials: Testimonial[] = [];
 
 export const legal = {
   // Change this whenever the Terms or Privacy Policy wording changes.
-  updated: "September 17, 2026",
+  updated: "September 18, 2026",
   operator: "Salman Ahmad, a sole proprietor in Calgary, Alberta, operating as AHMXD Technologies",
 };
 
@@ -275,31 +316,20 @@ export const projects: Project[] = [
     domain: "cdndayz.com",
     image: "/work/cdndayz.png",
   },
-  {
-    name: "Nitor",
-    kind: "Product design",
-    relation: "Lab",
-    summary:
-      "A habit tracker with forgiving streaks and secure accounts.",
-    stack: ["Next.js", "Supabase", "GSAP"],
-    href: "https://nitor-peach.vercel.app/",
-    domain: "nitor-peach.vercel.app",
-    image: "/work/nitor.png",
-  },
 ];
 
 export const steps = [
   {
     title: "Scope",
-    body: "What it must do, who it serves, what done looks like.",
+    body: "What it must do, who it serves, and a fixed written quote.",
+  },
+  {
+    title: "Deposit",
+    body: "A deposit books your spot and starts the design.",
   },
   {
     title: "Mockup",
-    body: "See the design before a line of code is written.",
-  },
-  {
-    title: "Sign-off",
-    body: "Approve the design and a written quote.",
+    body: "See and approve the design before it is built.",
   },
   {
     title: "Build",
@@ -307,7 +337,7 @@ export const steps = [
   },
   {
     title: "Launch",
-    body: "Domain, hosting, analytics and a walkthrough.",
+    body: "Final payment, then the site goes live with a walkthrough.",
   },
   {
     title: "Support",
@@ -318,35 +348,27 @@ export const steps = [
 export const faqs = [
   {
     q: "What does a website cost?",
-    a: `A Starter site is ${cad(starter.upfront)} plus ${cad(terms.hosting)} a month for hosting, or ${cad(starter.monthly)} a month with hosting included. Every project gets a written quote before work starts, and the price does not change mid-build.`,
+    a: `A Starter site is ${cad(starter.upfront)} plus ${cad(terms.hosting)} a month for hosting, or ${cad(starter.monthly)} a month with hosting included. Every project starts with a fixed written quote and a deposit, and the price does not change mid-build unless you add to the scope.`,
   },
   {
     q: "Who owns the website when it is finished?",
     a: `You own your domain and your content. The code and design are AHMXD's intellectual property, licensed to you to run your business, and hosting and the database stay with AHMXD. ${buyoutNote}`,
   },
   {
-    q: "What happens if I miss a monthly payment?",
-    a: `You get a reminder, then ${terms.graceDays} days' notice before the site is paused. Pay what is owed and it is back online, usually the same day.`,
-  },
-  {
-    q: "What if you are unavailable?",
-    a: "Your domain is in your name, every site ships with a handover guide and the tools are standard. If AHMXD ever closes, every client gets their site's code and files free, with the right to run them anywhere.",
-  },
-  {
-    q: "Do you only work with Calgary businesses?",
-    a: "Mostly Calgary and area, so we can meet in person. Anywhere in Canada works over video.",
-  },
-  {
     q: "How long does a website take?",
     a: "Weeks, not months, for a focused business site. The mockup keeps it on track.",
+  },
+  {
+    q: "What happens if I miss a monthly payment?",
+    a: `You get a reminder, then ${terms.graceDays} days' notice before the site is paused. Pay what is owed and it is back online, usually the same day.`,
   },
   {
     q: "Can you take over a site someone else built?",
     a: "Yes. It starts with an audit, so you know what you have before anything changes.",
   },
   {
-    q: "What happens if something breaks after launch?",
-    a: `You contact the person who built it. Monthly plans and hosting & care cover fixes. Otherwise it is ${cad(terms.hourly)} an hour.`,
+    q: "What about changes or fixes after launch?",
+    a: `Monthly plans and Hosting & care cover fixes and small edits, such as swapping text or photos (up to ${terms.smallEditMinutes} minutes a month). New pages, features, content or a redesign are new work, quoted separately or billed at ${cad(terms.hourly)} an hour.`,
   },
 ] as const;
 
@@ -360,5 +382,3 @@ export const needs = [
 ] as const;
 
 export const payments = ["Pay upfront", "Pay monthly", "Not sure yet"] as const;
-
-export const timelines = ["As soon as possible", "Within 1-3 months", "Just exploring"] as const;
